@@ -242,14 +242,55 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("OK", $response->getReasonPhrase());
     }
 
-    public function testDeleteDocument()
+    public function testDeleteDocumentNotExisting()
     {
-
+        try {
+            $response = $this->client->delete(
+                $this->baseDataUrl . 'foo'
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            $this->assertEquals(404, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Not Found", $e->getResponse()->getReasonPhrase());
+        }
     }
 
-    public function testDocumentAndFolderVersions()
+    public function testPutDeleteVersionUpdates()
     {
+        // every put and delete should update the version of the folder
+        // where the files are in (up to the root, try with some files)
+        $response = $this->client->put(
+            $this->baseDataUrl . 'file_stays_here',
+            array(
+                'body' => 'Hello World',
+                'headers' => array (
+                    'Content-Type' => 'text/plain'
+                )
+            )
+        );
 
+        $folderVersion = array();
+        $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
+
+        foreach (array("foo", "bar", "baz", "sub/foo", "sub/bar", "sub/baz", "level1/level2/level3/level4") as $f) {
+            $response = $this->client->put(
+                $this->baseDataUrl . $f,
+                array(
+                    'body' => 'Hello World',
+                    'headers' => array (
+                        'Content-Type' => 'text/plain'
+                    )
+                )
+            );
+            $this->assertEquals(200, $response->getStatusCode());
+            $this->assertNotContains($this->client->get($this->baseDataUrl)->getHeader("ETag"), $folderVersion);
+            $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
+
+            $response = $this->client->delete($this->baseDataUrl . $f);
+            $this->assertEquals(200, $response->getStatusCode());
+            $this->assertNotContains($this->client->get($this->baseDataUrl)->getHeader("ETag"), $folderVersion);
+            $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
+        }
     }
 
     private static function randomString()
