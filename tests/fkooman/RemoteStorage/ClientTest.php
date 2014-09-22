@@ -17,6 +17,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     private $moduleName;
     private $testFolder;
     private $baseDataUrl;
+    private $baseDataUrlOtherUser;
+    private $baseDataUrlOtherModule;
     private $client;
 
     protected static $randomString;
@@ -32,11 +34,15 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->moduleName = explode(":", $GLOBALS['RS_SCOPE'])[0];
         $this->testFolder = self::$randomString;
         $this->baseDataUrl = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, $this->moduleName, $this->testFolder);
+        $this->baseDataUrlOtherUser = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], 'wronguser', $this->moduleName, $this->testFolder);
+        $this->baseDataUrlOtherModule = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, 'othermodule', $this->testFolder);
+
         $this->client = new Client(
             array(
                 'defaults' => array(
                     'headers' => array(
-                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN'])
+                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN']),
+                        'Origin' => 'http://www.example.org/foo'
                     )
                 )
             )
@@ -72,7 +78,6 @@ class ClientTest extends PHPUnit_Framework_TestCase
         );
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
-        $this->assertEquals(0, $response->getHeader("Expires"));
         $this->assertTrue(is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
         $GLOBALS['TESTS_FOO_VERSION'] = explode('"', $response->getHeader("ETag"))[1];
     }
@@ -246,7 +251,11 @@ class ClientTest extends PHPUnit_Framework_TestCase
     {
         try {
             $response = $this->client->delete(
-                $this->baseDataUrl . 'foo'
+                $this->baseDataUrl . 'foo',
+                array(
+                    'headers' => array(
+                    )
+                )
             );
             $this->assertTrue(false);
         } catch (ClientException $e) {
@@ -286,12 +295,56 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $this->assertNotContains($this->client->get($this->baseDataUrl)->getHeader("ETag"), $folderVersion);
             $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
 
-            $response = $this->client->delete($this->baseDataUrl . $f);
+            $response = $this->client->delete(
+                $this->baseDataUrl . $f,
+                array(
+                    'headers' => array(
+                    )
+                )
+            );
             $this->assertEquals(200, $response->getStatusCode());
             $this->assertNotContains($this->client->get($this->baseDataUrl)->getHeader("ETag"), $folderVersion);
             $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
         }
     }
+
+#    public function testPutDocumentInOtherUserFolder()
+#    {
+#        try {
+#            $response = $this->client->put(
+#                $this->baseDataUrlOtherUser . 'foo',
+#                array(
+#                    'body' => 'Hello World',
+#                    'headers' => array (
+#                        'Content-Type' => 'text/plain'
+#                    )
+#                )
+#            );
+#            $this->assertTrue(false);
+#        } catch (ClientException $e) {
+#            $this->assertEquals(403, $e->getResponse()->getStatusCode());
+#            $this->assertEquals("Permission Denied", $e->getResponse()->getReasonPhrase());
+#        }
+#    }
+
+#    public function testPutDocumentInOtherModuleFolder()
+#    {
+#        try {
+#            $response = $this->client->put(
+#                $this->baseDataUrlOtherModule . 'foo',
+#                array(
+#                    'body' => 'Hello World',
+#                    'headers' => array (
+#                        'Content-Type' => 'text/plain'
+#                    )
+#                )
+#            );
+#            $this->assertTrue(false);
+#        } catch (ClientException $e) {
+#            $this->assertEquals(403, $e->getResponse()->getStatusCode());
+#            $this->assertEquals("Permission Denied", $e->getResponse()->getReasonPhrase());
+#        }
+#    }
 
     private static function randomString()
     {
