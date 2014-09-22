@@ -5,6 +5,14 @@ use GuzzleHttp\Exception\ClientException;
 
 class ClientTest extends PHPUnit_Framework_TestCase
 {
+
+    // global variables used to store the versions of folders and documents
+    // for use in later tests...
+    protected $backupGlobalsBlacklist = array(
+        'TESTS_FOO_VERSION',
+        'TESTS_TEST_FOLDER_VERSION'
+    );
+
     private $baseUrl;
     private $userId;
     private $moduleName;
@@ -62,6 +70,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("OK", $response->getReasonPhrase());
         $this->assertEquals(0, $response->getHeader("Expires"));
         $this->assertTrue(is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
+        $GLOBALS['TESTS_FOO_VERSION'] = explode('"', $response->getHeader("ETag"))[1];
     }
 
     public function testPutExistingDocument()
@@ -129,30 +138,122 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetNonExistingDocument()
     {
-
+        try {
+            $client = new Client();
+            $response = $client->get(
+                $this->baseDataUrl . 'bar'
+            );
+        } catch (ClientException $e) {
+            $this->assertEquals(404, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Not Found", $e->getResponse()->getReasonPhrase());
+        }
     }
 
     public function testGetExistingDocumentConditional()
     {
+        try {
+            $client = new Client();
 
+            $response = $client->get(
+                $this->baseDataUrl . 'foo',
+                array(
+                    'headers' => array (
+                        'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_FOO_VERSION'])
+                    )
+                )
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            $this->assertEquals(412, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
+        }
     }
 
     public function testGetExistingFolder()
     {
+        $client = new Client();
+        $response = $client->get($this->baseDataUrl);
 
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals("OK", $response->getReasonPhrase());
+        $this->assertEquals("application/ld+json", $response->getHeader("Content-Type"));
+        $this->assertEquals(0, $response->getHeader("Expires"));
+
+        $this->assertEquals(
+            array(
+                '@context' => 'http://remotestorage.io/spec/folder-description',
+                'items' => array(
+                    "foo" => array(
+                        "Content-Length" => 11,
+                        "Content-Type" => 'text/plain',
+                        "ETag" => $GLOBALS['TESTS_FOO_VERSION']
+                    )
+                )
+            ),
+            $response->json()
+        );
+        // make better test, maybe also !
+        $this->assertTrue(is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
+        $GLOBALS['TESTS_TEST_FOLDER_VERSION'] = explode('"', $response->getHeader("ETag"))[1];
     }
 
     public function testGetExistingFolderConditional()
     {
+        try {
+            $client = new Client();
 
+            $response = $client->get(
+                $this->baseDataUrl,
+                array(
+                    'headers' => array (
+                        'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_TEST_FOLDER_VERSION'])
+                    )
+                )
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            $this->assertEquals(412, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
+        }
     }
 
-    public function testDeleteDocument()
+    public function testDeleteDocumentWrongConditional()
     {
+        try {
+            $client = new Client();
 
+            $response = $client->delete(
+                $this->baseDataUrl . 'foo',
+                array(
+                    'headers' => array (
+                        'If-Match' => '"definitely-wrong-version"'
+                    )
+                )
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            $this->assertEquals(412, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
+        }
     }
 
     public function testDeleteDocumentConditional()
+    {
+        $client = new Client();
+
+        $response = $client->delete(
+            $this->baseDataUrl . 'foo',
+            array(
+                'headers' => array (
+                    'If-Match' => sprintf('"%s"', $GLOBALS['TESTS_FOO_VERSION'])
+                )
+            )
+        );
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals("OK", $response->getReasonPhrase());
+    }
+
+    public function testDeleteDocument()
     {
 
     }
