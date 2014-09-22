@@ -60,6 +60,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         );
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
+        $this->assertEquals(0, $response->getHeader("Expires"));
         $this->assertTrue(is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
     }
 
@@ -73,7 +74,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $response = $client->put(
                 $this->baseDataUrl . 'foo',
                 array(
-                    'body' => 'Hello World',
+                    'body' => 'Hello New World',
                     'headers' => array (
                         'Content-Type' => 'text/plain',
                         'If-Match' => '"wr0ngv3rs10n"'
@@ -109,6 +110,56 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $this->assertEquals(412, $e->getResponse()->getStatusCode());
             $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
         }
+    }
+
+    public function testGetExistingDocument()
+    {
+        $client = new Client();
+        $response = $client->get(
+            $this->baseDataUrl . 'foo'
+        );
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals("OK", $response->getReasonPhrase());
+        $this->assertEquals("Hello World", $response->getBody()->__toString());
+        $this->assertRegexp("|^text/plain.*|", $response->getHeader("Content-Type"));
+        $this->assertEquals(0, $response->getHeader("Expires"));
+        $this->assertTrue(is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
+    }
+
+    public function testGetNonExistingDocument()
+    {
+
+    }
+
+    public function testGetExistingDocumentConditional()
+    {
+
+    }
+
+    public function testGetExistingFolder()
+    {
+
+    }
+
+    public function testGetExistingFolderConditional()
+    {
+
+    }
+
+    public function testDeleteDocument()
+    {
+
+    }
+
+    public function testDeleteDocumentConditional()
+    {
+
+    }
+
+    public function testDocumentAndFolderVersions()
+    {
+
     }
 
     private static function randomString()
