@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<phpunit bootstrap="vendor/autoload.php" strict="true" colors="true">
+  <php>
+    <var name="RS_BASE_URL" value="http://localhost/php-remote-storage/api.php"/>
+    <var name="RS_AUTH_TOKEN" value="12345"/>
+    <var name="RS_USER_ID" value="admin"/>
+    <var name="RS_SCOPE" value="foo:rw"/>
+  </php>
+</phpunit>

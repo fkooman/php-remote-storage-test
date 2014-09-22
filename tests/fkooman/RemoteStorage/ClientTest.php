@@ -1,49 +1,35 @@
 <?php
 
-require_once 'vendor/autoload.php';
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
-// -- change this
-$baseUrl = 'http://localhost/php-remote-storage/api.php';
-$userId = 'admin';
-$scope = 'foo:rw';
-$apiKey = '12345';
-// -- end of change this
-
-try {
-    $t = new TestInstance($baseUrl, $userId, $scope);
-
-    $t->testNonExistingFolder();
-    $t->testPutDocument();
-    $t->testPutExistingDocument();
-    $t->testPutExistingDocumentIfNonMatchStar();
-
-} catch (Exception $e) {
-    echo $e->getMessage() . PHP_EOL;
-    exit(1);
-}
-
-class TestInstance
+class ClientTest extends PHPUnit_Framework_TestCase
 {
-    private $moduleName;
-    private $userId;
     private $baseUrl;
+    private $userId;
+    private $moduleName;
+    private $authToken;
     private $testFolder;
 
-    public function __construct($baseUrl, $userId, $scope)
+    protected static $randomString;
+
+    public static function setUpBeforeClass()
     {
-        $this->baseUrl = $baseUrl;
-        $this->userId = $userId;
-        $this->moduleName = explode(":", $scope)[0];
-        $this->testFolder = $this->randomString();
+        self::$randomString = self::randomString();
+    }
+
+    public function setUp()
+    {
+        $this->baseUrl = $GLOBALS['RS_BASE_URL'];
+        $this->userId = $GLOBALS['RS_USER_ID'];
+        $this->moduleName = explode(":", $GLOBALS['RS_SCOPE'])[0];
+        $this->authToken = $GLOBALS['RS_AUTH_TOKEN'];
+        $this->testFolder = self::$randomString;
     }
 
     public function testNonExistingFolder()
     {
         $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/';
-        //echo sprintf("GET %s", $baseDataUrl) . PHP_EOL;
         $client = new Client();
         $response = $client->get($baseDataUrl);
 
@@ -62,7 +48,6 @@ class TestInstance
     public function testPutDocument()
     {
         $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/' . 'foo';
-        //echo sprintf("PUT %s", $baseDataUrl) . PHP_EOL;
         $client = new Client();
 
         $response = $client->put(
@@ -85,8 +70,6 @@ class TestInstance
         // we try to put the same document as before, but as we specify a
         // wrong version so this MUST fail
         $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/' . 'foo';
-        //echo sprintf("PUT %s", $baseDataUrl) . PHP_EOL;
-
         try {
             $client = new Client();
 
@@ -112,7 +95,6 @@ class TestInstance
         // we try to put the same document as before, but as we specify "*" in
         // If-None-Match it should fail
         $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/' . 'foo';
-
         try {
             $client = new Client();
 
@@ -126,22 +108,14 @@ class TestInstance
                     )
                 )
             );
-            $this->assertEquals(true, false);
+            $this->assertTrue(false);
         } catch (ClientException $e) {
             $this->assertEquals(412, $e->getResponse()->getStatusCode());
             $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
         }
     }
 
-    private function assertEquals($match, $source)
-    {
-        if ($match != $source) {
-            throw new Exception(sprintf("[ERROR] '%s' does not match expected '%s'", $source, $match));
-        }
-        echo ".";
-    }
-
-    private function randomString()
+    private static function randomString()
     {
         return bin2hex(openssl_random_pseudo_bytes(8));
     }
