@@ -10,6 +10,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     private $moduleName;
     private $authToken;
     private $testFolder;
+    private $baseDataUrl;
 
     protected static $randomString;
 
@@ -25,33 +26,32 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->moduleName = explode(":", $GLOBALS['RS_SCOPE'])[0];
         $this->authToken = $GLOBALS['RS_AUTH_TOKEN'];
         $this->testFolder = self::$randomString;
+        $this->baseDataUrl = sprintf('%s/%s/%s/%s/', $this->baseUrl, $this->userId, $this->moduleName, $this->testFolder);
     }
 
     public function testNonExistingFolder()
     {
-        $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/';
         $client = new Client();
-        $response = $client->get($baseDataUrl);
+        $response = $client->get($this->baseDataUrl);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
         $jsonData = $response->json(array("object"=>true));
         $this->assertEquals("http://remotestorage.io/spec/folder-description", $jsonData->{'@context'});
+        # FIXME: better test for object?
         $this->assertEquals("object", gettype($jsonData->items));
         $this->assertEquals("application/ld+json", $response->getHeader("Content-Type"));
         $this->assertEquals(0, $response->getHeader("Expires"));
 
         // make better test, maybe also !
-        $this->assertEquals(true, is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
+        $this->assertTrue(is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
     }
 
     public function testPutDocument()
     {
-        $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/' . 'foo';
         $client = new Client();
-
         $response = $client->put(
-            $baseDataUrl,
+            $this->baseDataUrl . '/foo',
             array(
                 'body' => 'Hello World',
                 'headers' => array (
@@ -61,20 +61,18 @@ class ClientTest extends PHPUnit_Framework_TestCase
         );
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
-
-        $this->assertEquals(true, is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
+        $this->assertTrue(is_string($response->getHeader("ETag")) && strlen($response->getHeader("ETag")) > 0);
     }
 
     public function testPutExistingDocument()
     {
         // we try to put the same document as before, but as we specify a
         // wrong version so this MUST fail
-        $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/' . 'foo';
         try {
             $client = new Client();
 
             $response = $client->put(
-                $baseDataUrl,
+                $this->baseDataUrl . '/foo',
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
@@ -83,7 +81,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
                     )
                 )
             );
-            $this->assertEquals(true, false);
+            $this->assertTrue(false);
         } catch (ClientException $e) {
             $this->assertEquals(412, $e->getResponse()->getStatusCode());
             $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
@@ -94,12 +92,11 @@ class ClientTest extends PHPUnit_Framework_TestCase
     {
         // we try to put the same document as before, but as we specify "*" in
         // If-None-Match it should fail
-        $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/' . 'foo';
         try {
             $client = new Client();
 
             $response = $client->put(
-                $baseDataUrl,
+                $this->baseDataUrl . '/foo',
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
