@@ -20,3 +20,25 @@ To run the tests, run [PHPUnit](https://phpunit.de):
 
 This should run the test against your server and show you the output on how
 the server validates the compliancy test.
+
+# Testing Against the Starter Kit
+You can use the values below, but the `RS_AUTH_TOKEN` needs to be obtained 
+through your browser by checking the `Authorization` header that is used to 
+access the storage.
+
+    <var name="RS_BASE_URL" value="http://localhost:8000/storage"/>
+    <var name="RS_AUTH_TOKEN" value="f2485ae09b15...ea03071542a11"/>
+    <var name="RS_USER_ID" value="me"/>
+    <var name="RS_SCOPE" value="notes:rw"/>
+
+# Testing against php-remote-storage
+These are usuable values for the `php-remote-storage` server implementation, 
+you do need to obtain the `RS_AUTH_TOKEN` from your browser as well.
+
+    <var name="RS_BASE_URL" value="http://localhost/php-remote-storage/api.php"/>
+    <var name="RS_AUTH_TOKEN" value="f2485ae09b15...ea03071542a11"/>
+    <var name="RS_USER_ID" value="admin"/>
+    <var name="RS_SCOPE" value="foo:rw"/>
+
+The PHP server can be found 
+[here](https://github.com/fkooman/php-remote-storage).
