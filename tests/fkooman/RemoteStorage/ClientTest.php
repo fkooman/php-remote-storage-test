@@ -38,8 +38,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("OK", $response->getReasonPhrase());
         $jsonData = $response->json(array("object"=>true));
         $this->assertEquals("http://remotestorage.io/spec/folder-description", $jsonData->{'@context'});
-        # FIXME: better test for object?
-        $this->assertEquals("object", gettype($jsonData->items));
+        $this->assertInternalType("object", $jsonData->items);
         $this->assertEquals("application/ld+json", $response->getHeader("Content-Type"));
         $this->assertEquals(0, $response->getHeader("Expires"));
 
@@ -51,7 +50,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     {
         $client = new Client();
         $response = $client->put(
-            $this->baseDataUrl . '/foo',
+            $this->baseDataUrl . 'foo',
             array(
                 'body' => 'Hello World',
                 'headers' => array (
@@ -72,7 +71,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $client = new Client();
 
             $response = $client->put(
-                $this->baseDataUrl . '/foo',
+                $this->baseDataUrl . 'foo',
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
@@ -96,7 +95,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $client = new Client();
 
             $response = $client->put(
-                $this->baseDataUrl . '/foo',
+                $this->baseDataUrl . 'foo',
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
