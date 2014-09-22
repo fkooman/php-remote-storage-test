@@ -13,12 +13,11 @@ class ClientTest extends PHPUnit_Framework_TestCase
         'TESTS_TEST_FOLDER_VERSION'
     );
 
-    private $baseUrl;
     private $userId;
     private $moduleName;
-    private $authToken;
     private $testFolder;
     private $baseDataUrl;
+    private $client;
 
     protected static $randomString;
 
@@ -29,18 +28,24 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->baseUrl = $GLOBALS['RS_BASE_URL'];
         $this->userId = $GLOBALS['RS_USER_ID'];
         $this->moduleName = explode(":", $GLOBALS['RS_SCOPE'])[0];
-        $this->authToken = $GLOBALS['RS_AUTH_TOKEN'];
         $this->testFolder = self::$randomString;
-        $this->baseDataUrl = sprintf('%s/%s/%s/%s/', $this->baseUrl, $this->userId, $this->moduleName, $this->testFolder);
+        $this->baseDataUrl = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, $this->moduleName, $this->testFolder);
+        $this->client = new Client(
+            array(
+                'defaults' => array(
+                    'headers' => array(
+                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN'])
+                    )
+                )
+            )
+        );
     }
 
     public function testNonExistingFolder()
     {
-        $client = new Client();
-        $response = $client->get($this->baseDataUrl);
+        $response = $this->client->get($this->baseDataUrl);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
@@ -56,8 +61,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testPutDocument()
     {
-        $client = new Client();
-        $response = $client->put(
+        $response = $this->client->put(
             $this->baseDataUrl . 'foo',
             array(
                 'body' => 'Hello World',
@@ -78,9 +82,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         // we try to put the same document as before, but as we specify a
         // wrong version so this MUST fail
         try {
-            $client = new Client();
-
-            $response = $client->put(
+            $response = $this->client->put(
                 $this->baseDataUrl . 'foo',
                 array(
                     'body' => 'Hello New World',
@@ -102,9 +104,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         // we try to put the same document as before, but as we specify "*" in
         // If-None-Match it should fail
         try {
-            $client = new Client();
-
-            $response = $client->put(
+            $response = $this->client->put(
                 $this->baseDataUrl . 'foo',
                 array(
                     'body' => 'Hello World',
@@ -123,8 +123,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetExistingDocument()
     {
-        $client = new Client();
-        $response = $client->get(
+        $response = $this->client->get(
             $this->baseDataUrl . 'foo'
         );
 
@@ -139,8 +138,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testGetNonExistingDocument()
     {
         try {
-            $client = new Client();
-            $response = $client->get(
+            $response = $this->client->get(
                 $this->baseDataUrl . 'bar'
             );
         } catch (ClientException $e) {
@@ -152,9 +150,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testGetExistingDocumentConditional()
     {
         try {
-            $client = new Client();
-
-            $response = $client->get(
+            $response = $this->client->get(
                 $this->baseDataUrl . 'foo',
                 array(
                     'headers' => array (
@@ -171,8 +167,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetExistingFolder()
     {
-        $client = new Client();
-        $response = $client->get($this->baseDataUrl);
+        $response = $this->client->get($this->baseDataUrl);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
@@ -200,9 +195,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testGetExistingFolderConditional()
     {
         try {
-            $client = new Client();
-
-            $response = $client->get(
+            $response = $this->client->get(
                 $this->baseDataUrl,
                 array(
                     'headers' => array (
@@ -220,9 +213,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testDeleteDocumentWrongConditional()
     {
         try {
-            $client = new Client();
-
-            $response = $client->delete(
+            $response = $this->client->delete(
                 $this->baseDataUrl . 'foo',
                 array(
                     'headers' => array (
@@ -239,9 +230,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testDeleteDocumentConditional()
     {
-        $client = new Client();
-
-        $response = $client->delete(
+        $response = $this->client->delete(
             $this->baseDataUrl . 'foo',
             array(
                 'headers' => array (
