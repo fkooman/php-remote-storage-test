@@ -18,6 +18,7 @@ try {
     $t->testNonExistingFolder();
     $t->testPutDocument();
     $t->testPutExistingDocument();
+    $t->testPutExistingDocumentIfNonMatchStar();
 
 } catch (Exception $e) {
     echo $e->getMessage() . PHP_EOL;
@@ -96,6 +97,32 @@ class TestInstance
                     'headers' => array (
                         'Content-Type' => 'text/plain',
                         'If-Match' => '"wr0ngv3rs10n"'
+                    )
+                )
+            );
+            $this->assertEquals(true, false);
+        } catch (ClientException $e) {
+            $this->assertEquals(412, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
+        }
+    }
+
+    public function testPutExistingDocumentIfNonMatchStar()
+    {
+        // we try to put the same document as before, but as we specify "*" in
+        // If-None-Match it should fail
+        $baseDataUrl = $this->baseUrl . '/' . $this->userId . '/' . $this->moduleName . '/' . $this->testFolder . '/' . 'foo';
+
+        try {
+            $client = new Client();
+
+            $response = $client->put(
+                $baseDataUrl,
+                array(
+                    'body' => 'Hello World',
+                    'headers' => array (
+                        'Content-Type' => 'text/plain',
+                        'If-None-Match' => '"*"'
                     )
                 )
             );
