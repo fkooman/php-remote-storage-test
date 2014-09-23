@@ -366,9 +366,65 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testPutDocumentToFolderName()
     {
+        $response = $this->clientRw->put(
+            $this->baseDataUrlRw . 'foo/bar',
+            array(
+                'body' => 'Hello World',
+                'headers' => array (
+                    'Content-Type' => 'text/plain'
+                )
+            )
+        );
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals("OK", $response->getReasonPhrase());
 
+        try {
+            $response = $this->clientRw->put(
+                $this->baseDataUrlRw . 'foo',
+                array(
+                    'body' => 'Hello World',
+                    'headers' => array (
+                        'Content-Type' => 'text/plain'
+                    )
+                )
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            $this->assertEquals(409, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Conflict", $e->getResponse()->getReasonPhrase());
+        }
     }
 
+    public function testPutFolderToDocumentName()
+    {
+        $response = $this->clientRw->put(
+            $this->baseDataUrlRw . 'foo/bar',
+            array(
+                'body' => 'Hello World',
+                'headers' => array (
+                    'Content-Type' => 'text/plain'
+                )
+            )
+        );
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals("OK", $response->getReasonPhrase());
+
+        try {
+            $response = $this->clientRw->put(
+                $this->baseDataUrlRw . 'foo/bar/baz',
+                array(
+                    'body' => 'Hello World',
+                    'headers' => array (
+                        'Content-Type' => 'text/plain'
+                    )
+                )
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            $this->assertEquals(409, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Conflict", $e->getResponse()->getReasonPhrase());
+        }
+    }
     public function testCreateFolderWhereDocumentExists()
     {
 
@@ -376,6 +432,11 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testWritingWithOnlyReadScope()
     {
+    }
+
+    public function testHeadRequest()
+    {
+
     }
 
     public function testOptionsRequest()
