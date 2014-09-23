@@ -19,7 +19,9 @@ class ClientTest extends PHPUnit_Framework_TestCase
     private $baseDataUrl;
     private $baseDataUrlOtherUser;
     private $baseDataUrlOtherModule;
-    private $client;
+    private $clientRw;
+    private $clientR;
+    private $clientPublic;
 
     protected static $randomString;
 
@@ -31,17 +33,39 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->userId = $GLOBALS['RS_USER_ID'];
-        $this->moduleName = explode(":", $GLOBALS['RS_SCOPE'])[0];
+        $this->moduleNameRw = explode(":", $GLOBALS['RS_SCOPE_RW'])[0];
+        $this->moduleNameR = explode(":", $GLOBALS['RS_SCOPE_R'])[0];
         $this->testFolder = self::$randomString;
-        $this->baseDataUrl = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, $this->moduleName, $this->testFolder);
-        $this->baseDataUrlOtherUser = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], 'wronguser', $this->moduleName, $this->testFolder);
-        $this->baseDataUrlOtherModule = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, 'othermodule', $this->testFolder);
+        $this->baseDataUrlRw = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, $this->moduleNameRw, $this->testFolder);
+        $this->baseDataUrlR = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, $this->moduleNameR, $this->testFolder);
+        $this->baseDataUrlPublic = sprintf('%s/%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, "public", $this->moduleNameRw, $this->testFolder);
+        $this->baseDataUrlOtherUserRw = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], 'wronguser', $this->moduleNameRw, $this->testFolder);
+        $this->baseDataUrlOtherModuleRw = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, 'othermodule', $this->testFolder);
 
-        $this->client = new Client(
+        $this->clientRw = new Client(
             array(
                 'defaults' => array(
                     'headers' => array(
-                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN']),
+                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN_RW']),
+                        'Origin' => 'http://www.example.org/foo'
+                    )
+                )
+            )
+        );
+        $this->clientR = new Client(
+            array(
+                'defaults' => array(
+                    'headers' => array(
+                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN_R']),
+                        'Origin' => 'http://www.example.org/foo'
+                    )
+                )
+            )
+        );
+        $this->clientPublic = new Client(
+            array(
+                'defaults' => array(
+                    'headers' => array(
                         'Origin' => 'http://www.example.org/foo'
                     )
                 )
@@ -51,7 +75,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testNonExistingFolder()
     {
-        $response = $this->client->get($this->baseDataUrl);
+        $response = $this->clientRw->get($this->baseDataUrlRw);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
@@ -67,8 +91,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testPutDocument()
     {
-        $response = $this->client->put(
-            $this->baseDataUrl . 'foo',
+        $response = $this->clientRw->put(
+            $this->baseDataUrlRw . 'foo',
             array(
                 'body' => 'Hello World',
                 'headers' => array (
@@ -87,8 +111,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
         // we try to put the same document as before, but as we specify a
         // wrong version so this MUST fail
         try {
-            $response = $this->client->put(
-                $this->baseDataUrl . 'foo',
+            $response = $this->clientRw->put(
+                $this->baseDataUrlRw . 'foo',
                 array(
                     'body' => 'Hello New World',
                     'headers' => array (
@@ -109,8 +133,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
         // we try to put the same document as before, but as we specify "*" in
         // If-None-Match it should fail
         try {
-            $response = $this->client->put(
-                $this->baseDataUrl . 'foo',
+            $response = $this->clientRw->put(
+                $this->baseDataUrlRw . 'foo',
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
@@ -128,8 +152,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetExistingDocument()
     {
-        $response = $this->client->get(
-            $this->baseDataUrl . 'foo'
+        $response = $this->clientRw->get(
+            $this->baseDataUrlRw . 'foo'
         );
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -143,8 +167,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testGetNonExistingDocument()
     {
         try {
-            $response = $this->client->get(
-                $this->baseDataUrl . 'bar'
+            $response = $this->clientRw->get(
+                $this->baseDataUrlRw . 'bar'
             );
         } catch (ClientException $e) {
             $this->assertEquals(404, $e->getResponse()->getStatusCode());
@@ -155,8 +179,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testGetExistingDocumentConditional()
     {
         try {
-            $response = $this->client->get(
-                $this->baseDataUrl . 'foo',
+            $response = $this->clientRw->get(
+                $this->baseDataUrlRw . 'foo',
                 array(
                     'headers' => array (
                         'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_FOO_VERSION'])
@@ -172,7 +196,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetExistingFolder()
     {
-        $response = $this->client->get($this->baseDataUrl);
+        $response = $this->clientRw->get($this->baseDataUrlRw);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("OK", $response->getReasonPhrase());
@@ -200,8 +224,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testGetExistingFolderConditional()
     {
         try {
-            $response = $this->client->get(
-                $this->baseDataUrl,
+            $response = $this->clientRw->get(
+                $this->baseDataUrlRw,
                 array(
                     'headers' => array (
                         'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_TEST_FOLDER_VERSION'])
@@ -218,8 +242,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testDeleteDocumentWrongConditional()
     {
         try {
-            $response = $this->client->delete(
-                $this->baseDataUrl . 'foo',
+            $response = $this->clientRw->delete(
+                $this->baseDataUrlRw . 'foo',
                 array(
                     'headers' => array (
                         'If-Match' => '"definitely-wrong-version"'
@@ -235,8 +259,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testDeleteDocumentConditional()
     {
-        $response = $this->client->delete(
-            $this->baseDataUrl . 'foo',
+        $response = $this->clientRw->delete(
+            $this->baseDataUrlRw . 'foo',
             array(
                 'headers' => array (
                     'If-Match' => sprintf('"%s"', $GLOBALS['TESTS_FOO_VERSION'])
@@ -250,8 +274,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testDeleteDocumentNotExisting()
     {
         try {
-            $response = $this->client->delete(
-                $this->baseDataUrl . 'foo',
+            $response = $this->clientRw->delete(
+                $this->baseDataUrlRw . 'foo',
                 array(
                     'headers' => array(
                     )
@@ -268,8 +292,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     {
         // every put and delete should update the version of the folder
         // where the files are in (up to the root, try with some files)
-        $response = $this->client->put(
-            $this->baseDataUrl . 'file_stays_here',
+        $response = $this->clientRw->put(
+            $this->baseDataUrlRw . 'file_stays_here',
             array(
                 'body' => 'Hello World',
                 'headers' => array (
@@ -279,11 +303,11 @@ class ClientTest extends PHPUnit_Framework_TestCase
         );
 
         $folderVersion = array();
-        $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
+        $folderVersion[] = $this->clientRw->get($this->baseDataUrlRw)->getHeader("ETag");
 
         foreach (array("foo", "bar", "baz", "sub/foo", "sub/bar", "sub/baz", "level1/level2/level3/level4") as $f) {
-            $response = $this->client->put(
-                $this->baseDataUrl . $f,
+            $response = $this->clientRw->put(
+                $this->baseDataUrlRw . $f,
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
@@ -292,27 +316,27 @@ class ClientTest extends PHPUnit_Framework_TestCase
                 )
             );
             $this->assertEquals(200, $response->getStatusCode());
-            $this->assertNotContains($this->client->get($this->baseDataUrl)->getHeader("ETag"), $folderVersion);
-            $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
+            $this->assertNotContains($this->clientRw->get($this->baseDataUrlRw)->getHeader("ETag"), $folderVersion);
+            $folderVersion[] = $this->clientRw->get($this->baseDataUrlRw)->getHeader("ETag");
 
-            $response = $this->client->delete(
-                $this->baseDataUrl . $f,
+            $response = $this->clientRw->delete(
+                $this->baseDataUrlRw . $f,
                 array(
                     'headers' => array(
                     )
                 )
             );
             $this->assertEquals(200, $response->getStatusCode());
-            $this->assertNotContains($this->client->get($this->baseDataUrl)->getHeader("ETag"), $folderVersion);
-            $folderVersion[] = $this->client->get($this->baseDataUrl)->getHeader("ETag");
+            $this->assertNotContains($this->clientRw->get($this->baseDataUrlRw)->getHeader("ETag"), $folderVersion);
+            $folderVersion[] = $this->clientRw->get($this->baseDataUrlRw)->getHeader("ETag");
         }
     }
 
     public function testPutDocumentInOtherUserFolder()
     {
         try {
-            $response = $this->client->put(
-                $this->baseDataUrlOtherUser . 'foo',
+            $response = $this->clientRw->put(
+                $this->baseDataUrlOtherUserRw . 'foo',
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
@@ -331,8 +355,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testPutDocumentInOtherModuleFolder()
     {
         try {
-            $response = $this->client->put(
-                $this->baseDataUrlOtherModule . 'foo',
+            $response = $this->clientRw->put(
+                $this->baseDataUrlOtherModuleRw . 'foo',
                 array(
                     'body' => 'Hello World',
                     'headers' => array (
@@ -347,6 +371,32 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $this->assertEquals("Unauthorized", $e->getResponse()->getReasonPhrase());
         }
     }
+
+    public function testWritingWithOnlyReadScope()
+    {
+    }
+
+#    public function testDeletingWithOnlyReadScope()
+#    {
+#    }
+
+#    public function testGetPublicFolderListingWithoutCredentials()
+#    {
+#        try {
+#            $response = $this->clientPublic->get(
+#                $this->baseDataUrlPublic,
+#                array(
+#                    'headers' => array (
+#                    )
+#                )
+#            );
+#            $this->assertTrue(false);
+#        } catch (ClientException $e) {
+#            // FIXME: should this be 403?
+#            $this->assertEquals(401, $e->getResponse()->getStatusCode());
+#            $this->assertEquals("Unauthorized", $e->getResponse()->getReasonPhrase());
+#        }
+#    }
 
     private static function randomString()
     {

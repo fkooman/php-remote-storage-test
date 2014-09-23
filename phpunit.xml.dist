@@ -2,8 +2,10 @@
 <phpunit bootstrap="vendor/autoload.php" strict="true" colors="true">
   <php>
     <var name="RS_BASE_URL" value="http://localhost/php-remote-storage/api.php"/>
-    <var name="RS_AUTH_TOKEN" value="12345"/>
+    <var name="RS_AUTH_TOKEN_RW" value="12345"/>
+    <var name="RS_AUTH_TOKEN_R" value="54321"/>
     <var name="RS_USER_ID" value="admin"/>
-    <var name="RS_SCOPE" value="foo:rw"/>
+    <var name="RS_SCOPE_RW" value="foo:rw"/>
+    <var name="RS_SCOPE_R" value="bar:r"/>
   </php>
 </phpunit>
