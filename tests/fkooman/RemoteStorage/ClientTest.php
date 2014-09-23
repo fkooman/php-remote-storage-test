@@ -308,43 +308,45 @@ class ClientTest extends PHPUnit_Framework_TestCase
         }
     }
 
-#    public function testPutDocumentInOtherUserFolder()
-#    {
-#        try {
-#            $response = $this->client->put(
-#                $this->baseDataUrlOtherUser . 'foo',
-#                array(
-#                    'body' => 'Hello World',
-#                    'headers' => array (
-#                        'Content-Type' => 'text/plain'
-#                    )
-#                )
-#            );
-#            $this->assertTrue(false);
-#        } catch (ClientException $e) {
-#            $this->assertEquals(403, $e->getResponse()->getStatusCode());
-#            $this->assertEquals("Permission Denied", $e->getResponse()->getReasonPhrase());
-#        }
-#    }
+    public function testPutDocumentInOtherUserFolder()
+    {
+        try {
+            $response = $this->client->put(
+                $this->baseDataUrlOtherUser . 'foo',
+                array(
+                    'body' => 'Hello World',
+                    'headers' => array (
+                        'Content-Type' => 'text/plain'
+                    )
+                )
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            // FIXME: should this be 403?
+            $this->assertEquals(401, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Unauthorized", $e->getResponse()->getReasonPhrase());
+        }
+    }
 
-#    public function testPutDocumentInOtherModuleFolder()
-#    {
-#        try {
-#            $response = $this->client->put(
-#                $this->baseDataUrlOtherModule . 'foo',
-#                array(
-#                    'body' => 'Hello World',
-#                    'headers' => array (
-#                        'Content-Type' => 'text/plain'
-#                    )
-#                )
-#            );
-#            $this->assertTrue(false);
-#        } catch (ClientException $e) {
-#            $this->assertEquals(403, $e->getResponse()->getStatusCode());
-#            $this->assertEquals("Permission Denied", $e->getResponse()->getReasonPhrase());
-#        }
-#    }
+    public function testPutDocumentInOtherModuleFolder()
+    {
+        try {
+            $response = $this->client->put(
+                $this->baseDataUrlOtherModule . 'foo',
+                array(
+                    'body' => 'Hello World',
+                    'headers' => array (
+                        'Content-Type' => 'text/plain'
+                    )
+                )
+            );
+            $this->assertTrue(false);
+        } catch (ClientException $e) {
+            // FIXME: should this be 403?
+            $this->assertEquals(401, $e->getResponse()->getStatusCode());
+            $this->assertEquals("Unauthorized", $e->getResponse()->getReasonPhrase());
+        }
+    }
 
     private static function randomString()
     {
