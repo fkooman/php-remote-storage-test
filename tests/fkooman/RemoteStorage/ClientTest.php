@@ -178,20 +178,16 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetExistingDocumentConditional()
     {
-        try {
-            $response = $this->clientRw->get(
-                $this->baseDataUrlRw . 'foo',
-                array(
-                    'headers' => array (
-                        'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_FOO_VERSION'])
-                    )
+        $response = $this->clientRw->get(
+            $this->baseDataUrlRw . 'foo',
+            array(
+                'headers' => array (
+                    'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_FOO_VERSION'])
                 )
-            );
-            $this->assertTrue(false);
-        } catch (ClientException $e) {
-            $this->assertEquals(412, $e->getResponse()->getStatusCode());
-            $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
-        }
+            )
+        );
+        $this->assertEquals(304, $response->getStatusCode());
+        $this->assertEquals("Not Modified", $response->getReasonPhrase());
     }
 
     public function testGetExistingFolder()
@@ -223,20 +219,16 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetExistingFolderConditional()
     {
-        try {
-            $response = $this->clientRw->get(
-                $this->baseDataUrlRw,
-                array(
-                    'headers' => array (
-                        'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_TEST_FOLDER_VERSION'])
-                    )
+        $response = $this->clientRw->get(
+            $this->baseDataUrlRw,
+            array(
+                'headers' => array (
+                    'If-None-Match' => sprintf('"%s"', $GLOBALS['TESTS_TEST_FOLDER_VERSION'])
                 )
-            );
-            $this->assertTrue(false);
-        } catch (ClientException $e) {
-            $this->assertEquals(412, $e->getResponse()->getStatusCode());
-            $this->assertEquals("Precondition Failed", $e->getResponse()->getReasonPhrase());
-        }
+            )
+        );
+        $this->assertEquals(304, $response->getStatusCode());
+        $this->assertEquals("Not Modified", $response->getReasonPhrase());
     }
 
     public function testDeleteDocumentWrongConditional()
@@ -370,6 +362,16 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $this->assertEquals(401, $e->getResponse()->getStatusCode());
             $this->assertEquals("Unauthorized", $e->getResponse()->getReasonPhrase());
         }
+    }
+
+    public function testPutDocumentToFolderName()
+    {
+
+    }
+
+    public function testCreateFolderWhereDocumentExists()
+    {
+
     }
 
     public function testWritingWithOnlyReadScope()
