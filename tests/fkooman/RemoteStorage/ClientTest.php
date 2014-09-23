@@ -378,6 +378,26 @@ class ClientTest extends PHPUnit_Framework_TestCase
     {
     }
 
+    public function testOptionsRequest()
+    {
+        // preflight check
+        $response = $this->clientPublic->options(
+            $this->baseDataUrlOtherModuleRw . 'foo',
+            array(
+                'headers' => array (
+                )
+            )
+        );
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals("OK", $response->getReasonPhrase());
+        // FIXME: also accept * as respose Origin
+        $this->assertEquals("http://www.example.org/foo", $response->getHeader("Access-Control-Allow-Origin"));
+        // FIXME: also accept different order and maybe without HEAD and OPTIONS?
+        $this->assertEquals("GET, PUT, DELETE, HEAD, OPTIONS", $response->getHeader("Access-Control-Allow-Methods"));
+        // FIXME: also accept different order and maybe without some of the headers?
+        $this->assertEquals("Authorization, Content-Length, Content-Type, Origin, X-Requested-With, If-Match, If-None-Match", $response->getHeader("Access-Control-Allow-Headers"));
+    }
+
 #    public function testDeletingWithOnlyReadScope()
 #    {
 #    }
