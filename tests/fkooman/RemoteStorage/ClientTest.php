@@ -3,6 +3,8 @@
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
+use fkooman\WebFinger\WebFinger;
+
 class ClientTest extends PHPUnit_Framework_TestCase
 {
 
@@ -12,6 +14,9 @@ class ClientTest extends PHPUnit_Framework_TestCase
         'TESTS_FOO_VERSION',
         'TESTS_TEST_FOLDER_VERSION'
     );
+
+    const SCOPE_RW = 'foo:rw';
+    const SCOPE_R = 'bar:r';
 
     private $userId;
     private $moduleName;
@@ -32,42 +37,54 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->userId = $GLOBALS['RS_USER_ID'];
-        $this->moduleNameRw = explode(":", $GLOBALS['RS_SCOPE_RW'])[0];
-        $this->moduleNameR = explode(":", $GLOBALS['RS_SCOPE_R'])[0];
+        $wf = new WebFinger(
+            array(
+                "verify" => $GLOBALS['WEBFINGER_VERIFY_CERT'],
+                "ignore_media_type" => $GLOBALS['WEBFINGER_IGNORE_MEDIA_TYPE']
+            )
+        );
+
+        $webFingerData = $wf->finger($GLOBALS['WEBFINGER_ID']);
+        $baseUrl = $webFingerData->getHref('remotestorage');
+
+        //$this->userId = $GLOBALS['RS_USER_ID'];
+        $this->moduleNameRw = explode(":", self::SCOPE_RW)[0];
+        $this->moduleNameR = explode(":", self::SCOPE_R)[0];
         $this->testFolder = self::$randomString;
-        $this->baseDataUrlRw = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, $this->moduleNameRw, $this->testFolder);
-        $this->baseDataUrlR = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, $this->moduleNameR, $this->testFolder);
-        $this->baseDataUrlPublic = sprintf('%s/%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, "public", $this->moduleNameRw, $this->testFolder);
-        $this->baseDataUrlOtherUserRw = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], 'wronguser', $this->moduleNameRw, $this->testFolder);
-        $this->baseDataUrlOtherModuleRw = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], $this->userId, 'othermodule', $this->testFolder);
+        $this->baseDataUrlRw = sprintf('%s/%s/%s/', $baseUrl, $this->moduleNameRw, $this->testFolder);
+        $this->baseDataUrlR = sprintf('%s/%s/%s/', $baseUrl, $this->moduleNameR, $this->testFolder);
+        $this->baseDataUrlPublic = sprintf('%s/%s/%s/%s/', $baseUrl, "public", $this->moduleNameRw, $this->testFolder);
+#        $this->baseDataUrlOtherUserRw = sprintf('%s/%s/%s/%s/', $GLOBALS['RS_BASE_URL'], 'wronguser', $this->moduleNameRw, $this->testFolder);
+        $this->baseDataUrlOtherModuleRw = sprintf('%s/%s/%s/', $baseUrl, 'othermodule', $this->testFolder);
 
         $this->clientRw = new Client(
             array(
                 'defaults' => array(
                     'headers' => array(
-                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN_RW']),
+                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_TOKEN']),
                         'Origin' => 'http://www.example.org/foo'
-                    )
+                    ),
+                    'verify' => $GLOBALS['WEBFINGER_VERIFY_CERT']
                 )
             )
         );
-        $this->clientR = new Client(
-            array(
-                'defaults' => array(
-                    'headers' => array(
-                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_AUTH_TOKEN_R']),
-                        'Origin' => 'http://www.example.org/foo'
-                    )
-                )
-            )
-        );
+#        $this->clientR = new Client(
+#            array(
+#                'defaults' => array(
+#                    'headers' => array(
+#                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_TOKEN']),
+#                        'Origin' => 'http://www.example.org/foo'
+#                    )
+#                )
+#            )
+#        );
         $this->clientPublic = new Client(
             array(
                 'defaults' => array(
                     'headers' => array(
                         'Origin' => 'http://www.example.org/foo'
-                    )
+                    ),
+                    'verify' => $GLOBALS['WEBFINGER_VERIFY_CERT']
                 )
             )
         );
@@ -324,25 +341,25 @@ class ClientTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function testPutDocumentInOtherUserFolder()
-    {
-        try {
-            $response = $this->clientRw->put(
-                $this->baseDataUrlOtherUserRw . 'foo',
-                array(
-                    'body' => 'Hello World',
-                    'headers' => array (
-                        'Content-Type' => 'text/plain'
-                    )
-                )
-            );
-            $this->assertTrue(false);
-        } catch (ClientException $e) {
-            // FIXME: should this be 403?
-            $this->assertEquals(401, $e->getResponse()->getStatusCode());
-            $this->assertEquals("Unauthorized", $e->getResponse()->getReasonPhrase());
-        }
-    }
+#    public function testPutDocumentInOtherUserFolder()
+#    {
+#        try {
+#            $response = $this->clientRw->put(
+#                $this->baseDataUrlOtherUserRw . 'foo',
+#                array(
+#                    'body' => 'Hello World',
+#                    'headers' => array (
+#                        'Content-Type' => 'text/plain'
+#                    )
+#                )
+#            );
+#            $this->assertTrue(false);
+#        } catch (ClientException $e) {
+#            // FIXME: should this be 403?
+#            $this->assertEquals(401, $e->getResponse()->getStatusCode());
+#            $this->assertEquals("Unauthorized", $e->getResponse()->getReasonPhrase());
+#        }
+#    }
 
     public function testPutDocumentInOtherModuleFolder()
     {
