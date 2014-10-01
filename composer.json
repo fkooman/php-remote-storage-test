@@ -9,9 +9,10 @@
     "license": "AGPL-3.0",
     "name": "fkooman/php-remote-storage-test",
     "require": {
-	"phpunit/phpunit": "~4.2",
         "ext-openssl": "*",
+        "fkooman/webfinger": "dev-master",
         "guzzlehttp/guzzle": "4.*",
-        "php": ">=5.4"
+        "php": ">=5.4",
+        "phpunit/phpunit": "~4.2"
     }
 }
