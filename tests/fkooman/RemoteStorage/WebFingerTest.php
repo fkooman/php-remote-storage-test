@@ -1,6 +1,9 @@
 <?php
 
+namespace fkooman\RemoteStorage;
+
 use fkooman\WebFinger\WebFinger;
+use PHPUnit_Framework_TestCase;
 
 class WebFingerTest extends PHPUnit_Framework_TestCase
 {
@@ -17,8 +20,18 @@ class WebFingerTest extends PHPUnit_Framework_TestCase
 
         $this->assertInternalType('string', $webFingerData->getHref('remotestorage'));
         // we want an auth URI
-        $this->assertNotNull($webFingerData->getProperty('remotestorage', 'http://tools.ietf.org/html/rfc6749#section-4.2'));
+        $this->assertNotNull(
+            $webFingerData->getProperty(
+                'remotestorage',
+                'http://tools.ietf.org/html/rfc6749#section-4.2'
+            )
+        );
         // we need a version
-        $this->assertNotNull($webFingerData->getProperty('remotestorage', 'http://remotestorage.io/spec/version'));
+        $this->assertNotNull(
+            $webFingerData->getProperty(
+                'remotestorage',
+                'http://remotestorage.io/spec/version'
+            )
+        );
     }
 }

@@ -1,9 +1,11 @@
 <?php
 
+namespace fkooman\RemoteStorage;
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-
 use fkooman\WebFinger\WebFinger;
+use PHPUnit_Framework_TestCase;
 
 class ClientTest extends PHPUnit_Framework_TestCase
 {

@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "22e8adc8f6631aabaa26be1c07e5e777",
+    "hash": "5274a900c25dfd6a94d83dc8685d2495",
     "packages": [
         {
             "name": "fkooman/webfinger",
