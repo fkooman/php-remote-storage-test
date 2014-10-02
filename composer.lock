@@ -4,20 +4,20 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "8ee48ba04fc32731f1efd0a2517e3a54",
+    "hash": "da78b00a812558723322f41cf34c247f",
     "packages": [
         {
             "name": "fkooman/webfinger",
-            "version": "dev-master",
+            "version": "0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fkooman/php-lib-webfinger.git",
-                "reference": "16d666788c54d53c99f03cb13e26d3b28d9acb5a"
+                "reference": "fdd5816208310485651cb0f28ec7b4698467ed94"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fkooman/php-lib-webfinger/zipball/16d666788c54d53c99f03cb13e26d3b28d9acb5a",
-                "reference": "16d666788c54d53c99f03cb13e26d3b28d9acb5a",
+                "url": "https://api.github.com/repos/fkooman/php-lib-webfinger/zipball/fdd5816208310485651cb0f28ec7b4698467ed94",
+                "reference": "fdd5816208310485651cb0f28ec7b4698467ed94",
                 "shasum": ""
             },
             "require": {
@@ -41,7 +41,7 @@
                 }
             ],
             "description": "WebFinger client written in PHP",
-            "time": "2014-10-01 12:25:39"
+            "time": "2014-10-02 08:43:05"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -971,9 +971,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "fkooman/webfinger": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "platform": {
         "ext-openssl": "*",
