@@ -2,9 +2,9 @@
 
 namespace fkooman\RemoteStorage;
 
-class ReadFolderTest extends BaseTest
+class ReadNonExistingFolder extends BaseTest
 {
-    public function testFooNonExistingFolder()
+    public function testNonExistingFolder()
     {
         // FIXME in draft-dejong-remotestorage-02 it is also allowed to return
         // a 404 if the folder does not exists...

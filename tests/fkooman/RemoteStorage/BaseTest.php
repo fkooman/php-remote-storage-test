@@ -63,6 +63,15 @@ class BaseTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('http://remotestorage.io/spec/folder-description', $folderData->{'@context'});
         $this->assertObjectHasAttribute('items', $folderData);
         $this->assertInternalType('object', $folderData->items);
+        foreach ($folderData->items as $k => $v) {
+            $this->assertInternalType('string', $k);
+            $this->assertObjectHasAttribute('ETag', $v);
+            if (false === strpos($k, '/')) {
+                // node is document
+                $this->assertObjectHasAttribute('Content-Type', $v);
+                $this->assertObjectHasAttribute('Content-Length', $v);
+            }
+        }
     }
 
     public function validateCrossOriginHeaders($response)
