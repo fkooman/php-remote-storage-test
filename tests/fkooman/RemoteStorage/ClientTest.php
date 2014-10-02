@@ -64,7 +64,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
                         'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_TOKEN']),
                         'Origin' => 'http://www.example.org/foo'
                     ),
-                    'verify' => $GLOBALS['WEBFINGER_VERIFY_CERT']
+                    'verify' => $GLOBALS['RS_VERIFY_CERT']
                 )
             )
         );
@@ -84,7 +84,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
                     'headers' => array(
                         'Origin' => 'http://www.example.org/foo'
                     ),
-                    'verify' => $GLOBALS['WEBFINGER_VERIFY_CERT']
+                    'verify' => $GLOBALS['RS_VERIFY_CERT']
                 )
             )
         );

@@ -4,20 +4,20 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "da78b00a812558723322f41cf34c247f",
+    "hash": "22e8adc8f6631aabaa26be1c07e5e777",
     "packages": [
         {
             "name": "fkooman/webfinger",
-            "version": "0.1.0",
+            "version": "0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fkooman/php-lib-webfinger.git",
-                "reference": "fdd5816208310485651cb0f28ec7b4698467ed94"
+                "reference": "f0d0440fab2412cf880f22ec367acb31a2d7af0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fkooman/php-lib-webfinger/zipball/fdd5816208310485651cb0f28ec7b4698467ed94",
-                "reference": "fdd5816208310485651cb0f28ec7b4698467ed94",
+                "url": "https://api.github.com/repos/fkooman/php-lib-webfinger/zipball/f0d0440fab2412cf880f22ec367acb31a2d7af0a",
+                "reference": "f0d0440fab2412cf880f22ec367acb31a2d7af0a",
                 "shasum": ""
             },
             "require": {
@@ -41,7 +41,7 @@
                 }
             ],
             "description": "WebFinger client written in PHP",
-            "time": "2014-10-02 08:43:05"
+            "time": "2014-10-02 10:10:10"
         },
         {
             "name": "guzzlehttp/guzzle",
