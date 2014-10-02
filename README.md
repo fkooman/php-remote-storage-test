@@ -7,6 +7,15 @@ This tool aims at validating `draft-dejong-remotestorage-03.txt` compliance,
 including the WebFinger discovery step. The OAuth token needs to be manually
 obtained, see below.
 
+# Requirements
+You need the following installed on your system:
+- PHP >= 5.4
+- php-openssl
+- [PHPUnit](https://phpunit.de)
+
+You may need to install OpenSSL support for PHP by installing `php5-openssl`, 
+for instance on Debian.
+
 # Installation
 You need [Composer](https://getcomposer.org) to install the dependencies to
 run the tests.
