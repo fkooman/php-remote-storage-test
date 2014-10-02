@@ -14,7 +14,8 @@ You need the following installed on your system:
 - [PHPUnit](https://phpunit.de)
 
 You may need to install OpenSSL support for PHP by installing `php5-openssl`, 
-for instance on Debian.
+for instance on Debian. Make sure the module is enabled in your `php.ini` 
+file.
 
 # Installation
 You need [Composer](https://getcomposer.org) to install the dependencies to
