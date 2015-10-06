@@ -36,11 +36,11 @@ class BaseTest extends PHPUnit_Framework_TestCase
             array(
                 'defaults' => array(
                     'headers' => array(
-                        'Authorization' => sprintf("Bearer %s", $GLOBALS['RS_TOKEN']),
-                        'Origin' => 'https://app.example.org'
+                        'Authorization' => sprintf('Bearer %s', $GLOBALS['RS_TOKEN']),
+                        'Origin' => 'https://app.example.org',
                     ),
-                    'verify' => $GLOBALS['RS_VERIFY_CERT']
-                )
+                    'verify' => $GLOBALS['RS_VERIFY_CERT'],
+                ),
             )
         );
     }
@@ -49,7 +49,7 @@ class BaseTest extends PHPUnit_Framework_TestCase
     {
         $folderData = $response->json(
             array(
-                "object" => true
+                'object' => true,
             )
         );
 
@@ -77,8 +77,8 @@ class BaseTest extends PHPUnit_Framework_TestCase
         // GET requests, and MUST be 'https://app.example.org' for PUT and
         // DELETE requests
         $this->assertContains(
-            $response->getHeader("Access-Control-Allow-Origin"),
-            array("*", "https://app.example.org")
+            $response->getHeader('Access-Control-Allow-Origin'),
+            array('*', 'https://app.example.org')
         );
 
         # Simple Response Headers
@@ -90,8 +90,8 @@ class BaseTest extends PHPUnit_Framework_TestCase
         #    Pragma
 
         // so only ETag and Content-Length need to be "exposed"
-        $this->assertContains("ETag", $response->getHeader("Access-Control-Expose-Headers"), '', true);
-        $this->assertContains("Content-Length", $response->getHeader("Access-Control-Expose-Headers"), '', true);
+        $this->assertContains('ETag', $response->getHeader('Access-Control-Expose-Headers'), '', true);
+        $this->assertContains('Content-Length', $response->getHeader('Access-Control-Expose-Headers'), '', true);
     }
 
     protected static function randomString()
