@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<phpunit bootstrap="vendor/autoload.php" strict="true" colors="true">
+<phpunit bootstrap="vendor/autoload.php" colors="true">
   <php>
     <var name="WEBFINGER_ID" value="me@example.org"/>
     <var name="WEBFINGER_VERIFY_CERT" value="true"/>

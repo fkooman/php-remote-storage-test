@@ -15,8 +15,7 @@
     "name": "fkooman/php-remote-storage-test",
     "require": {
         "ext-openssl": "*",
-        "fkooman/webfinger": "~0.1.2",
-        "guzzlehttp/guzzle": "4.*",
-        "php": ">=5.4"
+        "fkooman/webfinger": "^1.0.0",
+        "guzzlehttp/guzzle": "~5.3"
     }
 }

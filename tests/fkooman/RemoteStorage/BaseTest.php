@@ -24,12 +24,9 @@ class BaseTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $wf = new WebFinger(
-            array(
-                "verify" => $GLOBALS['WEBFINGER_VERIFY_CERT'],
-                "ignore_media_type" => $GLOBALS['WEBFINGER_IGNORE_MEDIA_TYPE']
-            )
-        );
+        $wf = new WebFinger();
+        $wf->setOption('verify', $GLOBALS['WEBFINGER_VERIFY_CERT']);
+        $wf->setOption('ignore_media_type', $GLOBALS['WEBFINGER_IGNORE_MEDIA_TYPE']);
 
         $webFingerData = $wf->finger($GLOBALS['WEBFINGER_ID']);
         $this->storageUri = $webFingerData->getHref('remotestorage');
