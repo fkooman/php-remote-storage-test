@@ -7,4 +7,9 @@
     <var name="RS_VERIFY_CERT" value="true"/>
     <var name="RS_TOKEN" value="12345"/>
   </php>
+  <testsuites>
+    <testsuite name="Tests">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>
