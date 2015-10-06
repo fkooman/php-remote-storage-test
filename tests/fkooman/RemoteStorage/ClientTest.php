@@ -373,8 +373,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ClientException $e) {
             // FIXME: should this be 403?
-            $this->assertEquals(401, $e->getResponse()->getStatusCode());
-            $this->assertEquals('Unauthorized', $e->getResponse()->getReasonPhrase());
+            $this->assertEquals(403, $e->getResponse()->getStatusCode());
+            $this->assertEquals('Forbidden', $e->getResponse()->getReasonPhrase());
         }
     }
 
