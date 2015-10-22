@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <phpunit bootstrap="vendor/autoload.php" colors="true">
   <php>
-    <var name="WEBFINGER_ID" value="me@example.org"/>
+    <var name="WEBFINGER_ID" value="foo@example.org"/>
     <var name="WEBFINGER_VERIFY_CERT" value="true"/>
     <var name="WEBFINGER_IGNORE_MEDIA_TYPE" value="false"/>
     <var name="RS_VERIFY_CERT" value="true"/>

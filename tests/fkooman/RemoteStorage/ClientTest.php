@@ -42,7 +42,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $wf->setOption('verify', $GLOBALS['WEBFINGER_VERIFY_CERT']);
         $wf->setOption('ignore_media_type', $GLOBALS['WEBFINGER_IGNORE_MEDIA_TYPE']);
         $webFingerData = $wf->finger($GLOBALS['WEBFINGER_ID']);
-        $baseUrl = $webFingerData->getHref('remotestorage');
+        $baseUrl = $webFingerData->getHref('http://tools.ietf.org/id/draft-dejong-remotestorage');
 
         //$this->userId = $GLOBALS['RS_USER_ID'];
         $this->moduleNameRw = explode(':', self::SCOPE_RW)[0];
